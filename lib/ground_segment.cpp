@@ -6,7 +6,7 @@
  */
 
 #include "ground_segment.h"
-
+#include<lib/log.h>
 
 GroundSegmentation::GroundSegmentation(PointCloudType::Ptr incloud,GroundSegmentationMsg msg)
 {
@@ -22,6 +22,7 @@ GroundSegmentation::GroundSegmentation(PointCloudType::Ptr incloud,GroundSegment
   //分段进行平面分割
   for (int i = 0; i < incloud->points.size(); ++i)
   {
+    //   std::cout << incloud->points[i].x << " " << incloud->points[i].y << " " << incloud->points[i].z << std::endl;
       if(incloud->points[i].x<=15&&incloud->points[i].x>=0&&abs(incloud->points[i].y)<30)
       {
           _cloudptrlist[0]->points.push_back(incloud->points[i]);
@@ -77,16 +78,20 @@ void GroundSegmentation::planeSeg(PointCloudType::Ptr cloud,
 void GroundSegmentation::groundfilter(PointCloudType::Ptr groundpoints,PointCloudType::Ptr non_groundpoints)
 {
 
+
     for (int i = 0; i < _cloudptrlist.size()-2; ++i)
     {
         PointCloudType::Ptr ground_i(new  PointCloudType);
         PointCloudType::Ptr ground_no_i(new  PointCloudType);
+        // std::cout << "ground_i = " << ground_i->size() << " nonground_i = " << ground_no_i->size() << std::endl;
         pcl::ModelCoefficients::Ptr modelCoe1(new pcl::ModelCoefficients);
         pcl::PointIndices::Ptr indices1(new pcl::PointIndices);
         planeSeg(_cloudptrlist[i],modelCoe1,indices1);
         extractGround(ground_i,_cloudptrlist[i],indices1,false);
         extractGround(ground_no_i,_cloudptrlist[i],indices1,true);
-        *groundpoints+=*ground_i;
-        *non_groundpoints+=*ground_no_i;
+
+        *groundpoints += *ground_i;
+        *non_groundpoints +=*ground_no_i;
+        AINFO << "here" << endl;
     }
 }
